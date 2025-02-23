@@ -21,5 +21,5 @@ RUN yarn run build
 
 #FROM dependencies as development
 #USER node
-EXPOSE 3000
+EXPOSE 3003
 CMD ["yarn", "start"]
