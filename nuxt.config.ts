@@ -1,9 +1,11 @@
 export default {
   ssr: false,
   target: "static",
+
   router: {
     base: '/service-provider/'
   },
+
   app: {
     baseURL: '/service-provider/',
     head: {
@@ -17,20 +19,26 @@ export default {
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.svg" }],
     },
   },
+
   modules: ["@nuxtjs/tailwindcss"],
   css: ["/assets/css/main.css"],
+
   tailwindcss: {
     cssPath: "@/assets/css/main.css",
   },
+
   axios: {
     // Axios options here
     timeout: 10000, // Example: set timeout to 10 seconds
   },
-  plugins: [],
+
   // buildModules: [
   //   '@nuxtjs/moment'
   // ]
   // alias: {
   // 	'@': '/'
   // },
+  plugins: [],
+
+  compatibilityDate: "2025-03-07",
 };
