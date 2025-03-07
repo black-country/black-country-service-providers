@@ -27,48 +27,27 @@ export const useWebSocket = () => {
 
     // Connection events
     socket.value.on("connect", () => {
-      // console.log("Connected to WebSocket server");
-      // showToast({
-      //   title: "Success",
-      //   message: "Connection was successful",
-      //   toastType: "success",
-      //   duration: 3000
-      // });
-      console.log('connected')
+      showToast({
+        title: "Success",
+        message: "Connection was successful",
+        toastType: "success",
+        duration: 3000
+      });
       isConnected.value = true;
       fetchInitialMessages();
     });
 
     socket.value.on("disconnect", () => {
-      console.log("Disconnected from server");
-      // showToast({
-      //   title: "Error",
-      //   message: "Disconnected from websocket.",
-      //   toastType: "error",
-      //   duration: 3000
-      // });
       isConnected.value = false;
     });
 
     socket.value.on("error", (error) => {
-      showToast({
-        title: "Error",
-        message: "Connection error:",
-        toastType: "error",
-        duration: 3000
-      });
       isConnected.value = false;
     });
 
- 
-    socket.value.on("message.new", (message: any) => {
-      showToast({
-        title: "Success",
-        message: "You have a new Message",
-        toastType: "success",
-        duration: 3000
-      });
-      // console.log("New message receivedssssssss:", message.message);
+    socket.value.on("message.new", async (message: any) => {
+      console.log("New message receivedssssssss:", message.message);
+      await fetchInitialMessages();
       if (message && !messages.value.some(msg => msg.id === message?.message?.id)) {
         const newMessage = {
           ...message.message, // Use only the message object
@@ -102,6 +81,31 @@ export const useWebSocket = () => {
     });
   };
 
+  const markMessageAsRead = (roomId: string, recipientId: string) => {
+    if (!socket.value?.connected) {
+      console.error("Socket not connected");
+      return;
+    }
+
+    const payload = {roomId, recipientId};
+
+    socket.value.emit("message.read.all", payload, (response: any) => {
+      if (response.status === "success" || response.success === "true") {
+        // console.log(`msg read in ${roomId}`);
+        // console.log(payload)
+
+        messages.value = messages.value.map((msg) =>
+          msg.roomId === roomId && (!recipientId || msg.recipientId === recipientId)
+            ? { ...msg, unreadMessagesCount: 0 }
+            : msg
+        );
+      } else {
+        console.error("Failed to mark message as read:", response);
+      }
+    });
+  };
+
+
   const sendMessage = async (payload: {
     recipientId: string;
     recipientType: string;
@@ -109,6 +113,7 @@ export const useWebSocket = () => {
     room?: string;
     messageType: string;
   }) => {
+    console.log(payload, 'here')
     if (!socket.value?.connected) {
       console.error("Socket not connected");
       return;
@@ -131,8 +136,8 @@ export const useWebSocket = () => {
       socket.value?.emit("message.new", payload, (response: any) => {
         if (response.status === "success") {
           // Update temp message with actual message data
-          messages.value = messages.value.map(msg => 
-            msg.id === tempId 
+          messages.value = messages.value.map(msg =>
+            msg.id === tempId
               ? { ...response.data, status: 'sent' }
               : msg
           );
@@ -152,12 +157,12 @@ export const useWebSocket = () => {
           resolve(response.data);
         } else {
           // Update temp message to show error
-          messages.value = messages.value.map(msg => 
-            msg.id === tempId 
+          messages.value = messages.value.map(msg =>
+            msg.id === tempId
               ? { ...msg, status: 'error' }
               : msg
           );
-          
+
           console.error("Failed to send message:", response);
           reject(new Error(response.message || 'Failed to send message'));
         }
@@ -184,5 +189,6 @@ export const useWebSocket = () => {
     isConnected,
     sendMessage,
     socket: socket.value,
+    markMessageAsRead
   };
 };
