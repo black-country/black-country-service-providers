@@ -17,8 +17,8 @@ export default {
         { name: "format-detection", content: "telephone=no" },
       ],
       link: [
-        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: "icon", type: "image/svg+xml", href: "/service-provider/favicon.svg" },
+        { rel: 'icon', type: 'image/png', href: '/service-provider/favicon.png' },
       ],
     },
   },
@@ -34,13 +34,6 @@ export default {
     // Axios options here
     timeout: 10000, // Example: set timeout to 10 seconds
   },
-
-  // buildModules: [
-  //   '@nuxtjs/moment'
-  // ]
-  // alias: {
-  // 	'@': '/'
-  // },
   plugins: [],
 
   compatibilityDate: "2025-03-07",
