@@ -164,7 +164,7 @@
 
               <!-- Chat Messages -->
               <div class="flex-1 overflow-y-auto p-4">
-                <ChatWindow class="z-10" :roomChats="roomChatsList" :messages="messages" :selectedUser="selectedUser" />
+                <ChatWindow class="z-10" :roomChats="roomChatsList" :messages="currentRoomMessages" :selectedUser="selectedUser" />
               </div>
 
               <!-- Message Input -->
@@ -193,13 +193,8 @@ import { useWebSocket } from "@/composables/modules/messages/sockets";
 const { loadingActiveChats, activeChatsList, getActiveChats } = useGetActiveChats();
 const { getRoomChats, loadingRoomChats, roomChatsList } = useGetRoomChats();
 const { loading, tenant } = useFetchTenant();
-const {
-  messages,
-  newMessage,
-  isConnected,
-  sendMessage,
-  markMessageAsRead
-} = useWebSocket();
+const { messagesByRoom, currentRoomMessages, setActiveRoom, socket, newMessage, isConnected, sendMessage, markMessageAsRead } = useWebSocket();
+
 
 definePageMeta({
   middleware: 'auth'
@@ -235,9 +230,17 @@ watch(selectedUser, async (newVal: any) => {
 });
 
 // Watch for new messages to scroll to bottom
-watch(messages, (newMessages) => {
+watch(currentRoomMessages, (newMessages) => {
   if (newMessages.length > 0) {
     scrollToBottom();
+  }
+}, { deep: true });
+
+watch(messagesByRoom, (newVal) => {
+  const currentRoomId = selectedUser.value?.id;
+  if (currentRoomId && newVal[currentRoomId]) {
+    getRoomChats(currentRoomId);
+    getActiveChats()
   }
 }, { deep: true });
 
@@ -258,7 +261,7 @@ const sendMessageToUser = async (content: string) => {
       "Cannot send message: No recipient selected or not connected"
     );
     return;
-  }
+  } setActiveRoom(userId)
 
   messageStatus.value = "sending";
 
@@ -279,7 +282,6 @@ const sendMessageToUser = async (content: string) => {
     messageStatus.value = "error";
   }
   getActiveChats();
-  console.log('first')
 };
 
 // User selection
@@ -289,21 +291,16 @@ const sendMessageToUser = async (content: string) => {
 //   router.push({ query: { userId: user.id } });
 // };
 
+
 const selectUser = async (user: any) => {
-  console.log(user, 'selected user');
   selectedUser.value = user;
-
-  // Mark as read
-  if (user?.lastMessage?.roomId && user?.lastMessage?.recipientId) {
-    await markMessageAsRead(user.lastMessage.roomId, user.lastMessage.recipientId);
-  }
-
-  // Wait for the DOM to update before continuing
+  await markMessageAsRead(user.lastMessage.roomId, user.lastMessage.recipientId);
   await nextTick();
-
-  await getRoomChats(selectedUser.value?.id);
-  router.push({ query: { userId: user.id } });
-};
+  const userId = user?.participant?.id
+  if (userId) {
+    router.push({ query: { userId } });
+  }
+}
 
 watch(activeChatsList, (newChats) => {
   if (selectedUser.value) {
@@ -325,6 +322,30 @@ const scrollToBottom = () => {
 // Event handling
 const { $emitter } = useNuxtApp();
 
+watch(
+  activeChatsList,
+  (newVal) => {
+    console.log(newVal, "active chats (watch)");
+    const userId = route.query.userId;
+    if (userId) {
+      const user = newVal.find((u) => u?.participant?.id === userId);
+      if (user) {
+        selectUser(user);
+      } else {
+        if (newVal.length === 1) {
+          selectUser(newVal[0]);
+        }
+      }
+    }
+
+    if (newVal.length) {
+      selectUser(newVal[0]);
+      console.log("only one item found");
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   // Handle URL parameters
   const userId = route.query.userId;
@@ -336,14 +357,16 @@ onMounted(() => {
     }
   }
 
-  // // Set up event listeners
-  // $emitter.on('customEvent', async (payload: any) => {
-  //   if (payload.data) {
-  //     await getRoomChats(payload.data);
-  //     scrollToBottom();
-  //   }
-  // });
+  // Set up event listeners
+  $emitter.on('customEvent', async (payload: any) => {
+    if (payload.data) {
+      await getRoomChats(payload.data);
+      scrollToBottom();
+    }
+  });
 });
+
+
 
 onUnmounted(() => {
   // Clean up event listeners

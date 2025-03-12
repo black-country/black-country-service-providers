@@ -285,8 +285,8 @@ const onConfirm = () => {
   loading.value = true
   localStorage.clear()
   showBLogoutModal.value = false
-  router.push('/login')
-  window.location.href="/login"
+  // router.push('/login')
+  window.location.href="/service-provider/login"
   console.log("Logging out...");
 };
 
