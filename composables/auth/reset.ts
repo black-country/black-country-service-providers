@@ -1,10 +1,10 @@
 import { auth_api } from "@/api_factory/modules/auth";
 import { useCustomToast } from '@/composables/core/useCustomToast'
-const { showToast } = useCustomToast();
 
 export const use_auth_reset_password = () => {
   const Router = useRouter();
   const route = useRoute();
+  const { showToast } = useCustomToast();
   const credential = {
     password: ref(""),
     confirmPassword: ref(""),
@@ -47,11 +47,11 @@ export const use_auth_reset_password = () => {
     }
   };
 
-    // Computed properties for validation
-const passwordMismatch = computed(() => {
-	return credential.password.value !== credential.confirmPassword.value;
+  // Computed properties for validation
+  const passwordMismatch = computed(() => {
+    return credential.password.value !== credential.confirmPassword.value;
   });
-  
+
 
   return { credential, reset_password, loading, isFormDisabled, passwordMismatch };
 };

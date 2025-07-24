@@ -31,7 +31,7 @@ export const use_auth_login = () => {
       useUser().createUser(res.data);
       showToast({
         title: "Success",
-        message: 'Login was successfully',
+        message: 'Login was successfull',
         toastType: "success",
         duration: 3000
       });
@@ -41,7 +41,7 @@ export const use_auth_login = () => {
       console.log(res, 'tes here')
       showToast({
         title: "Error",
-        message: res?.data?.error  || "Something went wrong",
+        message: res?.data?.error  || "No internet connection. Please check your network and try again.",
         toastType: "error",
         duration: 3000
       });
