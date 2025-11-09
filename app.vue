@@ -1,20 +1,20 @@
 <template>
   <main>
     <!-- Position the toast fixed to ensure it's always on top and aligned to the right -->
-    <CoreToast class="fixed top-4 right-4 z-[9999999]" />
+    <UiToast class="z-[9999999]" />
 
-    <div v-if="!showSplash" class="transition-opacity duration-700 ease-in-out">
+    <!-- <div v-if="!showSplash" class="transition-opacity duration-700 ease-in-out"> -->
     <NuxtLayout class="z-10">
-      <CoreSplashScreen />
+      <!-- <CoreSplashScreen /> -->
       <NuxtPage class="z-10" />
     </NuxtLayout>
-  </div>
+  <!-- </div> -->
   </main>
 </template>
 
 <script setup lang="ts">
 import { provide } from 'vue';
-import { visible, toastData, useCustomToast } from '@/composables/core/useCustomToast';
+// import { visible, toastData, useCustomToast } from '@/composables/core/useCustomToast';
 import { useWebSocket } from "@/composables/modules/messages/sockets";
 // import avatar from '@/assets/icons/user-avatar.svg'
 const {
@@ -24,17 +24,17 @@ const {
   sendMessage
 } = useWebSocket();
 
-// Provide the toast state globally
-provide('toastVisible', visible);
-provide('toastData', toastData);
+// // Provide the toast state globally
+// provide('toastVisible', visible);
+// provide('toastData', toastData);
 
-const showSplash = ref(true)
+// const showSplash = ref(true)
 
-onMounted(() => {
-  setTimeout(() => {
-    showSplash.value = false
-  }, 3000)
-})
+// onMounted(() => {
+//   setTimeout(() => {
+//     showSplash.value = false
+//   }, 3000)
+// })
 </script>
 
 
