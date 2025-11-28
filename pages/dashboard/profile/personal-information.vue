@@ -100,7 +100,8 @@ const route = useRoute();
 const updatingImageProfile = ref(false)
 
 definePageMeta({
-  layout: "dashboard"
+  layout: "dashboard",
+  middleware: 'auth'
 })
 
 const fullName = ref(`${credential.value.firstName || ''} ${credential.value.lastName || ''}`); 
@@ -224,7 +225,4 @@ const goBack = () => {
   router.push('/profile/profile-settings');
 };
 
-definePageMeta({
-     middleware: 'auth'
-})
 </script>
